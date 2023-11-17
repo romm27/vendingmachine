@@ -2,11 +2,12 @@ import defines
 import utilities
 
 #UI Utilities
-def CreateCostumerPrompt(prompt):
+def CreateCostumerPrompt(prompt, _force_capital = True):
     print(prompt, end='')
     temp = input()
-    temp = temp.lower()
-    temp = temp.strip()
+    if(_force_capital):
+        temp = temp.lower()
+        temp = temp.strip()
     defines.input_buffer = temp
     return temp
 #Catalogue Validation
@@ -125,21 +126,22 @@ class Product:
         print('\n', self.productId, ' - ',  self.name, ' for just', self.price, '! we have', self.stock, ' unit(s) available.\n', end='')
     
     def modify_product_prompt(self):
-        print("Use x in the product name to delete it, or x in the other parameters to keep them.")
-        name = CreateCostumerPrompt("Enter Product Name: ")
-        if name != "x":
-            self.name = name
-        else:
-            if catalogue.__contains__(self):
-                catalogue.remove(self)
-            return False
+        print("Use x in the product name to delete it, leave parameters empty to not change them.")
+        name = CreateCostumerPrompt("Enter Product Name: ", False)
+        if name != "":
+            if name != "x":
+                self.name = name
+            else:
+                if catalogue.__contains__(self):
+                    catalogue.remove(self)
+                return False
         price = CreateCostumerPrompt("Enter Product Price: ")
-        if price != "x" and price.isdigit:
+        if price != "" and price.isdigit:
             self.price = float(price)
         
         stock = CreateCostumerPrompt("Enter Product Stock: ")
-        if price != "x" and price.isdigit:
-            self.price = int(stock)
+        if stock != "" and price.isdigit:
+            self.stock = int(stock)
         return True
 
 #Money Section

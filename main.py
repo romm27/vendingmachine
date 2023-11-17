@@ -100,12 +100,12 @@ bills[0].define_bill("Duzentos Reais", 200 * 100, 10)
 
 def deposit_bill(_value, _quantity):
     for i in range(0, len(bills)):
-        if bills[i].value == _value:
+        if bills[i].value == _value * 100:
             bills[i].available += _quantity
 
 def withdraw_bill(_value, _quantity):
     for i in range(0, len(bills)):
-        if bills[i].value == _value:
+        if bills[i].value == _value * 100:
             if bills[i].available > _quantity:
                 bills[i].available -= _quantity
                 return True
@@ -144,7 +144,7 @@ class Product:
             self.stock = int(stock)
         return True
 
-#Money Section
+#Money Section  
 available_bills = []
 
 #Catalogue Section
@@ -189,7 +189,7 @@ while True:
             deposited_amount = int(int(CreateCostumerPrompt('>')) * 100)
             valid = False
             #Check for valid purchase
-            if deposited_amount >= ref.price:
+            if deposited_amount >= ref.price and catalogue[buying_target].stock > 0:
                 print("Congratulations on buying", ref.name,'!')
                 dep = int(int(deposited_amount))
                 #print(ref.price)
@@ -198,7 +198,7 @@ while True:
                 valid = print_change(dep - pr)
             else:
                 print('\n' * 5)
-                print("I am sorry but that is not enough to afford our product! perhaps try something cheaper?")
+                print("I am sorry but that is not enough to afford our product or we are out of stock! perhaps try something cheaper?")
                 continue
 
             if valid:

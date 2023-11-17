@@ -18,7 +18,34 @@ def validate_choice(_choice):
 
 #Change
 def print_change(_value): #returns False if there are not enough notes.
-    return False
+    #print("value:", _value)
+    print("Have your change: \n")
+    #temp = int(_value * 100)
+    temp = _value
+    availability_change = []
+
+    for i in range(0, len(bills)):
+        availability_change.append(bills[i].available)
+    #print("bills: ", len(bills))
+    for i in range(0, len(bills)):
+        #print(bills[i].value, '\n')
+        while availability_change[i] > 0 and bills[i].value <= temp:
+            #print(temp)
+            temp -= int(bills[i].value)
+            availability_change[i] -= 1
+    print('\n')
+    #print(temp)
+    if(temp != 0):
+            return False
+    else:
+        for j in range(0, len(bills)):
+            if availability_change[j] < bills[j].available:
+                prints = bills[j].available - availability_change[j]
+                for count in range(0, prints):
+                    bills[j].print_bill()
+        for z in range(0, len(bills)):
+            bills[z].available = availability_change[z]
+    return True
 
 def update_catalogue_ids():
     for i in range(0, len(catalogue)):
@@ -35,11 +62,55 @@ class Bill:
     display_name = str("Buck")
     value = 10
     available = 0
+    bill_scii = ""
 
-    def define_bill(self, _display_name,_value, _available):
-        display_name = _display_name
-        value = _value
-        available = _available
+    def define_bill(self, _display_name,_value, _available, _scii = ""):
+        self.display_name = _display_name
+        self.value = _value
+        self.available = _available
+        if _scii != "":
+            self.bill_scii = _scii
+        else:
+            self.bill_scii = _display_name
+    def print_bill(self):
+        if self.bill_scii != "":
+            print(self.bill_scii)
+        else:
+            print(self.display_name)
+
+bills = []
+for i in range(0, 13):
+    bills.append(Bill())
+#Moedas
+bills[12].define_bill("Um Centavo", 0.01 * 100, 10)
+bills[11].define_bill("Cinco Centavos", 0.05 * 100, 10)
+bills[10].define_bill("Dez Centavos", 0.1 * 100, 10)
+bills[9].define_bill("Vinte e Cinco Centavos", 0.25 * 100, 10)
+bills[8].define_bill("Cinquenta Centavos", 0.5 * 100, 10)
+bills[7].define_bill("Um Real", 1 * 100, 10)
+#Notas
+bills[6].define_bill("Dois Reais", 2 * 100, 10)
+bills[5].define_bill("Cinco Reais", 5 * 100, 10)
+bills[4].define_bill("Dez Reais", 10 * 100, 10)
+bills[3].define_bill("Vinte Reais", 20 * 100, 10)
+bills[2].define_bill("Cinquenta Reais", 50 * 100, 10)
+bills[1].define_bill("Cem Reais", 100 * 100, 10)
+bills[0].define_bill("Duzentos Reais", 200 * 100, 10)
+
+def deposit_bill(_value, _quantity):
+    for i in range(0, len(bills)):
+        if bills[i].value == _value:
+            bills[i].available += _quantity
+
+def withdraw_bill(_value, _quantity):
+    for i in range(0, len(bills)):
+        if bills[i].value == _value:
+            if bills[i].available > _quantity:
+                bills[i].available -= _quantity
+                return True
+    return False
+                
+
 
 class Product:
     name = str("default")    
@@ -108,16 +179,21 @@ while True:
         deposited_amount = 0
         #Buying logic
         if validate_choice(defines.input_buffer):
-            ref = catalogue[int(defines.input_buffer) - 1]
+            buying_target = int(defines.input_buffer) - 1
+            ref = catalogue[buying_target]
             print("Now Buying", ref.name)
             print("The Product Price is", ref.price)
             print("What quantity is gonna be deposited?")
-            deposited_amount = int(CreateCostumerPrompt('>'))
-
+            deposited_amount = int(int(CreateCostumerPrompt('>')) * 100)
+            valid = False
             #Check for valid purchase
             if deposited_amount >= ref.price:
                 print("Congratulations on buying", ref.name,'!')
-                print_change(deposited_amount)
+                dep = int(int(deposited_amount))
+                #print(ref.price)
+                pr = int(float(ref.price) * 100)
+                #print(dep, pr)
+                valid = print_change(dep - pr)
             else:
                 print('\n' * 5)
                 print("I am sorry but that is not enough to afford our product! perhaps try something cheaper?")
@@ -125,6 +201,7 @@ while True:
 
             if valid:
                 print("Thanks for buying with us. \nEnjoy!")
+                catalogue[buying_target].stock -= 1
             else:
                 print("Sorry but we are out of change notes, your purchase has been refunded.")
             print('\n')
@@ -154,12 +231,32 @@ while True:
                 while True:
                     print("\n Banking screen enabled!")
                     print("Available commands:")
-                    print("d <billid> <amount> to deposit bills")
-                    print("w <billid> <amount> to withdraw bills")
+                    print("d <value> <amount> to deposit bills")
+                    print("w <value> <amount> to withdraw bills")
+                    print("v to view the bills available.")
                     CreateCostumerPrompt(">")
                     if defines.input_buffer == 'x':
                         break
-                    #elif defines.input_buffer[0] == w:
+                    if defines.input_buffer == 'v':
+                        print('=' * 20)
+                        for i in range(0, len(bills)):
+                            print(bills[i].display_name, bills[i].available, "Available")
+                        print('=' * 20)
+                        continue
+                    split = defines.input_buffer.split(' ')
+                    allowed = False
+                    if defines.input_buffer[0] == 'w':
+                        allowed = withdraw_bill(float(split[1]), int(split[2]))
+                        utilities.clear_console()
+                    elif defines.input_buffer[0] == 'd':
+                        deposit_bill(float(split[1]), int(split[2]))
+                        allowed = True
+                        utilities.clear_console()
+                    if allowed:
+                        print("The values were sucesfully changed!")
+                    else:
+                        print("You are not allowed to do that!")
+
 
             elif defines.input_buffer == '2' or defines.input_buffer == "c":
                 print('password')
